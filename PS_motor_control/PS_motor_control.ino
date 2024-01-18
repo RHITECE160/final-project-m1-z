@@ -142,7 +142,7 @@ void open() {
     myservo.write(pos);                             // tell servo to go to position in variable 'pos'
     delay(15);                                      // waits 15 ms for the servo to reach the position
   }
-  gripper_pos = 41;
+  gripper_pos = 139;
 }
 /* Closes the gripper */
 void close() {
@@ -150,7 +150,7 @@ void close() {
     myservo.write(pos);                               // tell servo to go to position in variable 'pos'
     delay(15);                                        // waits 15 ms for the servo to reach the position
   }
-  gripper_pos = 139;
+  gripper_pos = 41;
 }
 /* Stops robot forward: both motors disabled */
 void stop() {

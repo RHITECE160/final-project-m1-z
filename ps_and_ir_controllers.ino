@@ -1,3 +1,9 @@
+// Jocelyn, Ian, Owen
+// 1/23/24
+//The program causes the robot to move baced on the ps and ir controlers
+// The harware used was the PS and IR controlers and recivers and the robot
+// there are funtions for each of the movements and functions to relate butons to the movement funtions 
+// 
 // Load libraries used
 #include "SimpleRSLK.h"
 #include "Servo.h"

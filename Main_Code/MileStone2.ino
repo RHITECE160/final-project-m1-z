@@ -1,5 +1,5 @@
 // Jocelyn, Ian, Owen
-// 1/23/24
+// 1/27/24
 //The program causes the robot to move baced on the ps and ir controlers
 // The harware used was the PS and IR controlers and recivers and the robot
 // there are funtions for each of the movements and functions to relate butons to the movement funtions 
@@ -13,7 +13,8 @@
 // Helper macro for getting a macro definition as string
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
-
+/* Modify the following line to use an alternate UART interface (i.e. Serial1/2/3) */
+#define UART_SERIAL     Serial
 // Define pin numbers for the button on the PlayStation controller
 #define PS2_DAT 14  //P1.7 <-> brown wire
 #define PS2_CMD 15  //P1.6 <-> orange wire
@@ -37,11 +38,18 @@ enum RemoteMode {
 RemoteMode CurrentRemoteMode = IR_REMOTE;
 
 // Tuning Parameters
-const uint16_t lowSpeed = 15;
-const uint16_t fastSpeed = 30;
+const uint16_t lowSpeed = 10;
+const uint16_t normalSpeed = 15;
+const uint16_t fastSpeed = 20;
 
 // Window size of the median filter (odd number, 1 = no filtering)
 const byte medianFilterWindowSize = 5;
+
+/* Valid values are either:
+ *  DARK_LINE  if your floor is lighter than your line
+ *  LIGHT_LINE if your floor is darker than your line
+ */
+const uint8_t lineColor = LIGHT_LINE;
 
 // Create an object instance of the SharpDistSensor class
 SharpDistSensor sensor(sensorPin, medianFilterWindowSize);
@@ -53,8 +61,16 @@ int motorSpeed;
 
 Servo myservo;          // create servo object to control a servo
 int gripper_pos = 139;  // Gripper starts open
+bool isCalibrationComplete = false; // Setup Calabration
 void setup(){
-  
+  // Set up line flollowing
+  UART_SERIAL.begin(115200);
+
+    setupRSLK();
+    /* Left button on Launchpad */
+    setupWaitBtn(LP_LEFT_BTN);
+    /* Red led in rgb led */
+    setupLed(RED_LED);
 }
 void loop(){
   control();

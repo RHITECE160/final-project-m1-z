@@ -161,7 +161,7 @@ void autonomous() {
   stop();
   turnNinetyRight();
   while (distance >= stopDistance) {
-    // lineFollowing();
+    lineFollowing();
   }
   turnNinetyRight();
   turnNinetyRight();
@@ -261,4 +261,60 @@ void IRControler() {
         break;
     }
   }
+}
+void floorCalibration()
+{
+    /* Place Robot On Floor (no line) */
+    delay(2000);
+    UART_SERIAL.println("Push left button on Launchpad to begin calibration.");
+    UART_SERIAL.println("Make sure the robot is on the floor away from the line.\n");
+    /* Wait until button is pressed to start robot */
+    waitBtnPressed(LP_LEFT_BTN, RED_LED);
+
+    delay(500);
+    UART_SERIAL.println("Running calibration on floor");
+
+    /* Set both motors direction forward */
+    setMotorDirection(BOTH_MOTORS, MOTOR_DIR_FORWARD);
+    /* Enable both motors */
+    enableMotor(BOTH_MOTORS);
+    /* Set both motors speed 20 */
+    setMotorSpeed(BOTH_MOTORS, 20);
+
+    /* Must be called prior to using getLinePosition() or readCalLineSensor() */
+    calibrateLineSensor(lineColor);
+
+    /* Disable both motors */
+    disableMotor(BOTH_MOTORS);
+
+    UART_SERIAL.println("Reading floor values complete");
+
+    UART_SERIAL.println("Push left button on Launchpad to begin line following.");
+    UART_SERIAL.println("Make sure the robot is on the line.\n");
+    /* Wait until button is pressed to start robot */
+    waitBtnPressed(LP_LEFT_BTN, RED_LED);
+    delay(1000);
+
+    enableMotor(BOTH_MOTORS);
+}
+void lineFollowing()
+{
+    /* Run this setup only once */
+    if (isCalibrationComplete == false) {
+        floorCalibration();
+        isCalibrationComplete = true;
+    }
+
+    uint32_t linePos = getLinePosition();
+
+    if ((linePos > 0) && (linePos < 4000)) {    // turn left
+        setMotorSpeed(LEFT_MOTOR, normalSpeed);
+        setMotorSpeed(RIGHT_MOTOR, fastSpeed);
+    } else if (linePos > 5000) {                // turn right
+        setMotorSpeed(LEFT_MOTOR, fastSpeed);
+        setMotorSpeed(RIGHT_MOTOR, normalSpeed);
+    } else {                                    // go straight
+        setMotorSpeed(LEFT_MOTOR, normalSpeed);
+        setMotorSpeed(RIGHT_MOTOR, normalSpeed);
+    }
 }

@@ -75,6 +75,7 @@ void forward() {
 }
 /* Moves robot backwards: both motors forward same speed */
 void backwards() {
+  Serial.println("Backwards");
   disableMotor(BOTH_MOTORS);
   delay(50);
   enableMotor(BOTH_MOTORS);
@@ -84,6 +85,7 @@ void backwards() {
 }
 /* Moves robot spin right: both motors forward same speed */
 void right_spin() {
+  Serial.println("Right Spin");
   disableMotor(BOTH_MOTORS);
   delay(50);
   enableMotor(BOTH_MOTORS);
@@ -122,6 +124,7 @@ void left_turn() {
 }
 /* Opens the gripper */
 void open() {
+  Serial.println("Open");
   for (int pos = gripper_pos; pos < 140; pos += 1)  // goes from 0 degrees to 180 degrees
   {                                                 // in steps of 1 degree
     myservo.write(pos);                             // tell servo to go to position in variable 'pos'
@@ -139,6 +142,7 @@ void close() {
 }
 /* Stops robot forward: both motors disabled */
 void stop() {
+  Serial.println("Stop");
   disableMotor(BOTH_MOTORS);
 }
 void turnNinetyRight() {
@@ -147,26 +151,21 @@ void turnNinetyRight() {
   stop();
 }
 void autonomous() {
-  unsigned int distance = sensor.getDist();  // Sensor block returns calculated distance in inches
-  while (distance >= stopDistance) {
-    error = (distance - stopDistance);          // adjust speed baced on distance
-    motorSpeed = abs(error) * 6;                // represents the control effort
-    motorSpeed = constrain(motorSpeed, 0, 80);  //Motor speed can't be greater than 100 or less than zero
-    enableMotor(BOTH_MOTORS);
-    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
-    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
-    setMotorSpeed(BOTH_MOTORS, motorSpeed);
-    delayMicroseconds(50);  // add some delay to the loop to give motors time to change speed
-  }
-  stop();
-  turnNinetyRight();
-  while (distance >= stopDistance) {
-    lineFollowing();
-  }
-  turnNinetyRight();
-  turnNinetyRight();
-  open();
-  RemoteControlPlaystation();
+  Serial.println("Running Autonomus Mode");
+    forward_until_bump();
+    backwards();
+    delay(500);
+    right_spin();
+    delay(750);
+    stop();
+    forward_until_bump();
+    backwards();
+    delay(1500);
+    right_spin();
+    delay(1500);
+    stop();
+    open();
+    control();
 }
 /* RemoteControlPlaystation() function
   This function uses a playstation controller and the PLSK libraray with
@@ -317,4 +316,31 @@ void lineFollowing()
         setMotorSpeed(LEFT_MOTOR, normalSpeed);
         setMotorSpeed(RIGHT_MOTOR, normalSpeed);
     }
+}
+void setup_Bump_Switches()
+{
+  Serial.println("setup bump");
+    setupRSLK();
+}
+void forward_until_bump()
+{
+    bool hitObstacle = false;
+
+    /* Wait two seconds before starting */
+    delay(2000);
+    Serial.print("turning on motors");
+    /* Enable both motors, set their direction and provide a default speed */
+    forward();
+
+    /* Keep checking if the robot has hit an object */
+    while (!hitObstacle) {
+        /* Check if any bump switch was pressed */
+        if (getBumpSwitchPressed() > 0) {
+            hitObstacle = true;
+            break;
+        }
+    }
+
+    Serial.println("Collision detected\n");
+    disableMotor(BOTH_MOTORS);
 }

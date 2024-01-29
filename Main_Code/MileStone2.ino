@@ -1,5 +1,5 @@
 // Jocelyn, Ian, Owen
-// 1/27/24
+// 1/23/24
 //The program causes the robot to move baced on the ps and ir controlers
 // The harware used was the PS and IR controlers and recivers and the robot
 // there are funtions for each of the movements and functions to relate butons to the movement funtions 
@@ -35,7 +35,7 @@ enum RemoteMode {
 };
 
 // Declare and initialize the current state variable
-RemoteMode CurrentRemoteMode = IR_REMOTE;
+RemoteMode CurrentRemoteMode = PLAYSTATION;
 
 // Tuning Parameters
 const uint16_t lowSpeed = 10;
@@ -62,18 +62,19 @@ int motorSpeed;
 Servo myservo;          // create servo object to control a servo
 int gripper_pos = 139;  // Gripper starts open
 bool isCalibrationComplete = false; // Setup Calabration
-void setup(){
+void setup(){ // all setup for milestone 1 
   // Set up line flollowing
-  UART_SERIAL.begin(115200);
+  // UART_SERIAL.begin(115200); // causes bugs 
 
     setupRSLK();
     /* Left button on Launchpad */
     setupWaitBtn(LP_LEFT_BTN);
     /* Red led in rgb led */
     setupLed(RED_LED);
+
+    setupUp_to_Mile_Stone_1();
+    setup_Bump_Switches();
 }
 void loop(){
-  control();
+    control();       //////////////////////////////////////////////This what you change to unit test ///////////////////////////////
 }
-
-

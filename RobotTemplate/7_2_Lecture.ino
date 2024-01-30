@@ -1,5 +1,5 @@
-int IRLEDpin = 3; // P3.2
-int redLEDpin = 4; // P3.3
+int IRLEDpin = 3; // P3.2 <-> yellow wire
+int redLEDpin = 4; // P3.3 <-> green wire
 
 void setup() {
   pinMode(IRLEDpin, OUTPUT);

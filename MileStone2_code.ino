@@ -23,11 +23,14 @@
 // Define pin numbers for the button on the  IR controler
 #define sensorPin 26 //P4.4 <-> ???????
 #define IR_RCV_PIN 19  // P2.5 <-> black wire
+#define IR_TRX_PIN 3  // P3.2 <-> yellow wire
 IRreceiver irRX(IR_RCV_PIN);
+IRsender sendIR(IR_TRX_PIN);
 
 // Create an instance of the playstation controller object
 PS2X ps2x;
 IRData IRresults;
+IRData IRmsg;
 // Define remote mode either playstation controller or IR remote controller
 enum RemoteMode {
   PLAYSTATION,
@@ -71,10 +74,12 @@ void setup(){ // all setup for milestone 1
     setupWaitBtn(LP_LEFT_BTN);
     /* Red led in rgb led */
     setupLed(RED_LED);
+    pinMode(IR_TRX_PIN, INPUT);
 
     setupUp_to_Mile_Stone_1();
     setup_Bump_Switches_and_lineFollowing();
+    setup_transmit();
 }
 void loop(){
-    control();
+    control();       //////////////////////////////////////////////This what you change to unit test ///////////////////////////////
 }

@@ -51,8 +51,6 @@ void setupUp_to_Mile_Stone_1() {
   }
 }
 void control() {
-  stop();
-  Serial.print("Chosing Controler");
   // Read input from PlayStation controller
   ps2x.read_gamepad();
 
@@ -67,14 +65,36 @@ void control() {
     IRControler();
   }
 }
+void setup_transmit() {
+    // Serial.begin(57600);
+    delay(500); // To be able to connect Serial monitor after reset or power up 
+    Serial.println(F("START " __FILE__ " from " __DATE__));
+    /*
+     * Must be called to initialize and set up IR transmit pin.
+     *  bool IRsender::initIRSender( )
+     */
+    if (sendIR.initIRSender()) {
+        Serial.println(F("Ready to transmit NEC IR signals on pin " STR(IR_TRX_PIN)));
+    } else {
+        Serial.println("Initialization of IR transmitter failed!");
+        while (1) {;}
+    }
+    delay(200);
+    // enable transmit feedback and specify LED pin number (defaults to LED_BUILTIN)
+    enableTXLEDFeedback(BLUE_LED);
+
+    IRmsg.protocol = NEC;
+    IRmsg.address = 0xEE;
+    IRmsg.command = 0xA0;
+    IRmsg.isRepeat = false;
+}
 void forward() {
   disableMotor(BOTH_MOTORS);
   delay(50);
   enableMotor(BOTH_MOTORS);
   setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
   setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
-  setMotorSpeed(LEFT_MOTOR, 20);
-  setMotorSpeed(RIGHT_MOTOR, 21);
+  setMotorSpeed(BOTH_MOTORS, fastSpeed);
 }
 /* Moves robot backwards: both motors forward same speed */
 void backwards() {
@@ -125,19 +145,19 @@ void left_turn() {
   setMotorSpeed(RIGHT_MOTOR, fastSpeed);
   setMotorSpeed(LEFT_MOTOR, lowSpeed);
 }
-/* Opens the gripper */
-void open() {
-  Serial.println("Open");
-  for (int pos = gripper_pos; pos < 140; pos += 1)  // goes from 0 degrees to 180 degrees
+/* Closes the gripper */
+void close() {
+  Serial.println("Close");
+  for (int pos = gripper_pos; pos < 140; pos++)  // goes from 0 degrees to 180 degrees
   {                                                 // in steps of 1 degree
     myservo.write(pos);                             // tell servo to go to position in variable 'pos'
     delay(15);                                      // waits 15 ms for the servo to reach the position
   }
   gripper_pos = 139;
 }
-/* Closes the gripper */
-void close() {
-  for (int pos = gripper_pos; pos >= 41; pos -= 1) {  // goes from 180 degrees to 0 degrees
+/* Opens the gripper */
+void open() {
+  for (int pos = gripper_pos; pos >= 41; pos--) {  // goes from 180 degrees to 0 degrees
     myservo.write(pos);                               // tell servo to go to position in variable 'pos'
     delay(15);                                        // waits 15 ms for the servo to reach the position
   }
@@ -155,21 +175,21 @@ void turnNinetyRight() {
 }
 void autonomous() {
   Serial.println("Running Autonomus Mode");
-  forward_until_bump();
-  backwards();
-  delay(500);
-  right_spin();
-  delay(655);
-  stop();
-  forward();
-  lineFollowing();
-  backwards();
-  delay(2000);
-  right_spin();
-  delay(1000);
-  stop();
-  close();
-  control();
+    forward_until_bump();
+    backwards();
+    delay(500);
+    right_spin();
+    delay(655);
+    stop();
+    forward();
+    lineFollowing();
+    backwards();
+    delay(2000);
+    right_spin();
+    delay(1000);
+    stop();
+    open();
+    control();
 }
 /* RemoteControlPlaystation() function
   This function uses a playstation controller and the PLSK libraray with
@@ -217,6 +237,12 @@ void RemoteControlPlaystation() {
   } else if (ps2x.Button(PSB_CIRCLE)) {
     Serial.println("CIRCLE button pushed");
     autonomous();
+  } else if (ps2x.Button(PSB_START)) {
+    Serial.println("START button pushed");
+    transmit();
+  } else if (ps2x.Button(PSB_SELECT)) {
+    Serial.println("SELECT button pushed");
+    lineFollowing();
   }
 }
 void IRControler() {
@@ -262,105 +288,114 @@ void IRControler() {
         Serial.println("CIRCLE button pushed");
         autonomous();
         break;
+      case 0xD:
+        Serial.println("ST button pushed");
+        transmit();
+        break;
+      case 0x9:
+        Serial.println("^ button pushed");
+        lineFollowing();
+        break;
     }
   }
 }
-void floorCalibration() {
-  /* Place Robot On Floor (no line) */
-  delay(2000);
-  UART_SERIAL.println("Push left button on Launchpad to begin calibration.");
-  UART_SERIAL.println("Make sure the robot is on the floor away from the line.\n");
-  /* Wait until button is pressed to start robot */
-  waitBtnPressed(LP_LEFT_BTN, RED_LED);
-
-  delay(500);
-  UART_SERIAL.println("Running calibration on floor");
-
-  /* Set both motors direction forward */
-  setMotorDirection(BOTH_MOTORS, MOTOR_DIR_FORWARD);
-  /* Enable both motors */
-  enableMotor(BOTH_MOTORS);
-  /* Set both motors speed 20 */
-  setMotorSpeed(BOTH_MOTORS, 20);
-
-  /* Must be called prior to using getLinePosition() or readCalLineSensor() */
-  calibrateLineSensor(lineColor);
-
-  /* Disable both motors */
-  disableMotor(BOTH_MOTORS);
-
-  UART_SERIAL.println("Reading floor values complete");
-
-  UART_SERIAL.println("Push left button on Launchpad to begin line following.");
-  UART_SERIAL.println("Make sure the robot is on the line.\n");
-  /* Wait until button is pressed to start robot */
-  waitBtnPressed(LP_LEFT_BTN, RED_LED);
+void transmit() {
+  sendIR.write(&IRmsg);
   delay(1000);
-
-  enableMotor(BOTH_MOTORS);
 }
-void lineFollowing() {
+void floorCalibration()
+{
+    /* Place Robot On Floor (no line) */
+    delay(2000);
+    UART_SERIAL.println("Push left button on Launchpad to begin calibration.");
+    UART_SERIAL.println("Make sure the robot is on the floor away from the line.\n");
+    /* Wait until button is pressed to start robot */
+    waitBtnPressed(LP_LEFT_BTN, RED_LED);
 
-  Serial.println("Running Line Following");
-  bool hitObstacle = false;
-  while (!hitObstacle) {
-    uint32_t linePos = getLinePosition();
-    Serial.println("Testing line Position");
-    if ((linePos > 0) && (linePos < 4000)) {  // turn left
-      setMotorSpeed(LEFT_MOTOR, 8);
-      setMotorSpeed(RIGHT_MOTOR, 13);
-    } else if (linePos > 5000) {  // turn right
-      setMotorSpeed(LEFT_MOTOR, 13);
-      setMotorSpeed(RIGHT_MOTOR, 8);
-    } else {  // go straight
-      setMotorSpeed(LEFT_MOTOR, 12);
-      setMotorSpeed(RIGHT_MOTOR, 12);
-    }
+    delay(500);
+    UART_SERIAL.println("Running calibration on floor");
 
-    /* Check if any bump switch was pressed */
-    if (getBumpSwitchPressed() > 0) {
-      hitObstacle = true;
-      break;
+    /* Set both motors direction forward */
+    setMotorDirection(BOTH_MOTORS, MOTOR_DIR_FORWARD);
+    /* Enable both motors */
+    enableMotor(BOTH_MOTORS);
+    /* Set both motors speed 20 */
+    setMotorSpeed(BOTH_MOTORS, 20);
+
+    /* Must be called prior to using getLinePosition() or readCalLineSensor() */
+    calibrateLineSensor(lineColor);
+
+    /* Disable both motors */
+    disableMotor(BOTH_MOTORS);
+
+    UART_SERIAL.println("Reading floor values complete");
+
+    UART_SERIAL.println("Push left button on Launchpad to begin line following.");
+    UART_SERIAL.println("Make sure the robot is on the line.\n");
+    /* Wait until button is pressed to start robot */
+    waitBtnPressed(LP_LEFT_BTN, RED_LED);
+    delay(1000);
+
+    enableMotor(BOTH_MOTORS);
+}
+void lineFollowing()
+{
+    Serial.println("Running Line Following");
+    bool hitObstacle = false;
+    while(!hitObstacle) {
+      uint32_t linePos = getLinePosition();
+    if ((linePos > 0) && (linePos < 4000)) {    // turn left
+        setMotorSpeed(LEFT_MOTOR, 8);
+        setMotorSpeed(RIGHT_MOTOR, 13);
+    } else if (linePos > 5000) {                // turn right
+        setMotorSpeed(LEFT_MOTOR, 13);
+        setMotorSpeed(RIGHT_MOTOR, 8);
+    } else {                                    // go straight
+        setMotorSpeed(LEFT_MOTOR, 12);
+        setMotorSpeed(RIGHT_MOTOR, 12);
     }
   }
 
-  Serial.println("Collision detected\n");
-  disableMotor(BOTH_MOTORS);
-  delay(100);
+  // Check if any bunp switch was pressed
+  if (getBumpSwitchPressed() > 0){
+    hitObstacle = true;
+    
+  }
 }
-void setup_Bump_Switches_and_lineFollowing() {
+void setup_Bump_Switches_and_lineFollowing()
+{
   Serial.println("setup bump");
   setupRSLK();
-  if (isCalibrationComplete == false) {
+  if(isCalibrationComplete == false){
     floorCalibration();
     isCalibrationComplete = true;
   }
 }
-void forward_until_bump() {
-  bool hitObstacle = false;
+void forward_until_bump()
+{
+    bool hitObstacle = false;
 
-  /* Wait two seconds before starting */
-  delay(2000);
-  Serial.print("turning on motors");
-  /* Enable both motors, set their direction and provide a default speed */
-  // forward();
-  disableMotor(BOTH_MOTORS);
-  delay(50);
-  enableMotor(BOTH_MOTORS);
-  setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
-  setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
-  setMotorSpeed(LEFT_MOTOR, 20);
-  setMotorSpeed(RIGHT_MOTOR, 21);
-
-  /* Keep checking if the robot has hit an object */
-  while (!hitObstacle) {
-    /* Check if any bump switch was pressed */
-    if (getBumpSwitchPressed() > 0) {
-      hitObstacle = true;
-      break;
+    /* Wait two seconds before starting */
+    delay(2000);
+    Serial.print("turning on motors");
+    /* Enable both motors, set their direction and provide a default speed */
+    //forward();
+    disableMotor(BOTH_MOTORS);
+    delay(50);
+    enableMotor(BOTH_MOTORS);
+    setMotorDirection(LEFT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
+    setMotorSpeed(LEFT_MOTOR,20);
+    setMotorSpeed(RIGHT_MOTOR,21);
+    /* Keep checking if the robot has hit an object */
+    while (!hitObstacle) {
+        /* Check if any bump switch was pressed */
+        if (getBumpSwitchPressed() > 0) {
+            hitObstacle = true;
+            break;
+        }
     }
-  }
 
-  Serial.println("Collision detected\n");
-  disableMotor(BOTH_MOTORS);
+    Serial.println("Collision detected\n");
+    disableMotor(BOTH_MOTORS);
 }

@@ -1,7 +1,7 @@
 // Jocelyn, Ian, Owen
-// 1/23/24
-//The program causes the robot to move baced on the ps and ir controlers
-// The harware used was the PS and IR controlers and recivers and the robot
+// 1/30/24
+//The program causes the robot to move baced on the ps and ir controlers & runs autonomus code to navigate the robot through the tunnel and drop off a block 
+// The harware used was the PS and IR controlers and recivers and the robot & bump switches 
 // there are funtions for each of the movements and functions to relate butons to the movement funtions 
 // 
 // Load libraries used
@@ -21,13 +21,16 @@
 #define PS2_SEL 34   //P2.3 <-> yellow wire (also called attention)
 #define PS2_CLK 35   //P6.7 <-> blue wire
 // Define pin numbers for the button on the  IR controler
-#define sensorPin 26 //P4.4 <-> ???????
+#define sensorPin 26 //P4.4 <-> none
 #define IR_RCV_PIN 19  // P2.5 <-> black wire
+#define IR_TRX_PIN 3  // P3.2 <-> yellow wire
 IRreceiver irRX(IR_RCV_PIN);
+IRsender sendIR(IR_TRX_PIN);
 
 // Create an instance of the playstation controller object
 PS2X ps2x;
 IRData IRresults;
+IRData IRmsg;
 // Define remote mode either playstation controller or IR remote controller
 enum RemoteMode {
   PLAYSTATION,
@@ -74,6 +77,7 @@ void setup(){ // all setup for milestone 1
 
     setupUp_to_Mile_Stone_1();
     setup_Bump_Switches_and_lineFollowing();
+    setup_transmit();
 }
 void loop(){
     control();

@@ -240,6 +240,9 @@ void RemoteControlPlaystation() {
   } else if (ps2x.Button(PSB_START)) {
     Serial.println("START button pushed");
     transmit();
+  } else if (ps2x.Button(PSB_SELECT)) {
+    Serial.println("SELECT button pushed");
+    lineFollowing();
   }
 }
 void IRControler() {
@@ -288,6 +291,10 @@ void IRControler() {
       case 0xD:
         Serial.println("ST button pushed");
         transmit();
+        break;
+      case 0x9:
+        Serial.println("^ button pushed");
+        lineFollowing();
         break;
     }
   }

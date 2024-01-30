@@ -73,8 +73,8 @@ void setup(){ // all setup for milestone 1
     setupLed(RED_LED);
 
     setupUp_to_Mile_Stone_1();
-    setup_Bump_Switches();
+    setup_Bump_Switches_and_lineFollowing();
 }
 void loop(){
-    control();       //////////////////////////////////////////////This what you change to unit test ///////////////////////////////
+    control();
 }

@@ -127,7 +127,7 @@ void left_turn() {
   setMotorSpeed(LEFT_MOTOR, lowSpeed);
 }
 /* Opens the gripper */
-void open() {
+void close() {
   Serial.println("Open");
   for (int pos = gripper_pos; pos < 140; pos += 1)  // goes from 0 degrees to 180 degrees
   {                                                 // in steps of 1 degree
@@ -137,7 +137,7 @@ void open() {
   gripper_pos = 139;
 }
 /* Closes the gripper */
-void close() {
+void open() {
   for (int pos = gripper_pos; pos >= 41; pos -= 1) {  // goes from 180 degrees to 0 degrees
     myservo.write(pos);                               // tell servo to go to position in variable 'pos'
     delay(15);                                        // waits 15 ms for the servo to reach the position
@@ -150,26 +150,93 @@ void stop() {
   disableMotor(BOTH_MOTORS);
 }
 void turnNinetyRight() {
-  right_turn();
-  delay(20);
+  right_spin();
+  delay(turn_delay);
   stop();
+}
+void turnNinetyLeft() {
+  left_spin();
+  delay(turn_delay);
+  stop();
+}
+void turnOneEighty(){
+  turnNinetyLeft();
+  turnNinetyLeft();
 }
 void autonomous() {
   Serial.println("Running Autonomus Mode");
   forward_until_bump();
   backwards();
   delay(500);
-  right_spin();
-  delay(655);
-  stop();
+  turnNinetyRight();
   forward();
   lineFollowing();
   backwards();
-  delay(2000);
+  delay(2200);
+  turnOneEighty();
+  open();
+  control();
+}
+void autonomous2(){
+  Serial.println("Running Autonomus Mode V2");
+  for (int i = 0; i<2; i++){
+    forward();
+    lineFollowing();
+    backwards();
+    delay(650);
+    turnNinetyLeft();
+  }
+  forward();
+  lineFollowing();
+  backwards();
+  delay(650);
+  turnOneEighty();
+  backwards();
+  delay(700);
+  close();
+  delay(179);
+  for (int i = 0; i<4; i++){
+    forward();
+    lineFollowing();
+    backwards();
+    delay(650);
+    turnNinetyRight();
+  }
+  forward();
+  lineFollowing();
+  backwards();
+  delay(2200);
+  turnOneEighty();
+  open();
+  control();
+}
+void autonomous3() {
+  Serial.println("Running Autonomus Mode V3");
+  lineFollowing_timer();
+  turnNinetyLeft();
+  forward();
+  lineFollowing();
+  backwards();
+  delay(300);
   right_spin();
-  delay(1000);
+  delay(turn_delay * 1.25);
+  backwards();
+  delay(200);
   stop();
   close();
+  for (int i = 0; i<3; i++){
+  forward();
+  lineFollowing();
+  backwards();
+  delay(220);
+  turnNinetyRight();
+  }
+  forward();
+  lineFollowing();
+  backwards();
+  delay(2200);
+  turnOneEighty();
+  open();
   control();
 }
 void setupIRreciever(){
@@ -282,6 +349,12 @@ void RemoteControlPlaystation() {
   } else if (ps2x.Button(PSB_START)) {
     Serial.println("START button pushed");
     recieve(); delay(1000); transmit();
+  } else if (ps2x.Button(PSB_L3)) {
+    Serial.println("L3 button pushed");
+    autonomous2();
+  } else if (ps2x.Button(PSB_R3)) {
+    Serial.println("R3 button pushed");
+    autonomous3();
   }
 }
 void IRControler() {
@@ -331,6 +404,14 @@ void IRControler() {
         Serial.println("ST button pushed");
         recieve(); delay(1000); transmit();
         break; 
+      case 0x46:
+        Serial.println("L3 button pushed");
+        autonomous2();
+        break;
+      case 0x47:
+        Serial.println("R3 button pushed");
+        autonomous2();
+        break;
     }
   }
 }

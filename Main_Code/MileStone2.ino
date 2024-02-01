@@ -1,5 +1,5 @@
 // Jocelyn, Ian, Owen
-// 1/30/24
+// 2/1/24
 //The program causes the robot to move baced on the ps and ir controlers & runs autonomus code to navigate the robot through the tunnel and drop off a block 
 // The harware used was the PS and IR controlers and recivers and the robot & bump switches 
 // there are funtions for each of the movements and functions to relate butons to the movement funtions 
@@ -62,6 +62,7 @@ int stopDistance = 10;
 int error;
 int motorSpeed;
 
+uint16_t catrinaCode = 0; // holds code received from catrina candle
 Servo myservo;          // create servo object to control a servo
 int gripper_pos = 139;  // Gripper starts open
 bool isCalibrationComplete = false; // Setup Calabration

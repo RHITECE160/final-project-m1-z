@@ -32,6 +32,7 @@ void setupUp_to_Mile_Stone_1() {
         Serial.println("Controller refusing to enter Pressures mode, may not support it. ");
       delayMicroseconds(1000 * 1000);
     }
+    setupIRreciever(); // so IRreciever can still set up 
   } else if (CurrentRemoteMode == 1) {
     // put start-up code for IR controller here if neccessary
     Serial.println(F("START " __FILE__ " from " __DATE__));
@@ -171,12 +172,39 @@ void autonomous() {
   close();
   control();
 }
+void setupIRreciever(){
+  Serial.println(F("START " __FILE__ " from " __DATE__));
+    /*
+     * Must be called to initialize and set up IR receiver pin.
+     *  bool initIRReceiver(bool includeRepeats = true, bool enableCallback = false,
+                void (*callbackFunction)(uint16_t , uint8_t , bool) = NULL)
+     */
+    if (irRX.initIRReceiver()) {
+      Serial.println(F("Ready to receive NEC IR signals at pin " STR(IR_RCV_PIN)));
+    } else {
+      Serial.println("Initialization of IR receiver failed!");
+      while (1) { ; }
+    }
+    // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
+    enableRXLEDFeedback(BLUE_LED);
+}
+void recieve(){
+  if(irRX.decodeIR(&IRresults)){
+    if(IRresults.address == 0xCE){
+      catrinaCode = IRresults.command;
+    }
+  }
+}
 void transmit() {
+  if(catrinaCode !=0) {
+    IRmsg.address = 0xCE;
+    IRmsg.command = catrinaCode;
+  }
   sendIR.write(&IRmsg);
   delay(1000);
 }
+
 void setup_transmit() {
-    // Serial.begin(57600);
     delay(500); // To be able to connect Serial monitor after reset or power up 
     Serial.println(F("START " __FILE__ " from " __DATE__));
     /*
@@ -193,11 +221,18 @@ void setup_transmit() {
     // enable transmit feedback and specify LED pin number (defaults to LED_BUILTIN)
     enableTXLEDFeedback(BLUE_LED);
 
+    
     IRmsg.protocol = NEC;
     IRmsg.address = 0xEE;
     IRmsg.command = 0xA0;
     IRmsg.isRepeat = false;
+     
 }
+void setIRback(){
+  IRmsg.address = 0xEE;
+  IRmsg.command = 0xA0;
+}
+
 /* RemoteControlPlaystation() function
   This function uses a playstation controller and the PLSK libraray with
   an RLSK robot using to implement remote controller. 
@@ -222,7 +257,7 @@ void RemoteControlPlaystation() {
     backwards();
   } else if (ps2x.Button(PSB_CROSS)) {
     Serial.println("CROSS button pushed");
-    stop();
+    stop(); //setIRback();
   } else if (ps2x.Button(PSB_SQUARE)) {
     Serial.println("SQUARE button pushed");
     open();
@@ -246,7 +281,7 @@ void RemoteControlPlaystation() {
     autonomous();
   } else if (ps2x.Button(PSB_START)) {
     Serial.println("START button pushed");
-    transmit();
+    recieve(); delay(1000); transmit();
   }
 }
 void IRControler() {
@@ -262,7 +297,7 @@ void IRControler() {
         break;
       case 0x1C:
         Serial.println("5 button pushed");
-        stop();
+        stop(); //setIRback();
         break;
       case 0x16:
         Serial.println("0 button pushed");
@@ -292,9 +327,9 @@ void IRControler() {
         Serial.println("CIRCLE button pushed");
         autonomous();
         break;
-     case 0xD:
+      case 0xD:
         Serial.println("ST button pushed");
-        transmit();
+        recieve(); delay(1000); transmit();
         break; 
     }
   }

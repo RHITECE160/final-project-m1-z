@@ -61,7 +61,7 @@ SharpDistSensor sensor(sensorPin, medianFilterWindowSize);
 int stopDistance = 10;
 int error;
 int motorSpeed;
-
+int turn_delay = 655;
 uint16_t catrinaCode = 0; // holds code received from catrina candle
 Servo myservo;          // create servo object to control a servo
 int gripper_pos = 139;  // Gripper starts open

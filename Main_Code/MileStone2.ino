@@ -64,7 +64,7 @@ int motorSpeed;
 int turn_delay = 655;
 uint16_t catrinaCode = 0; // holds code received from catrina candle
 Servo myservo;          // create servo object to control a servo
-int gripper_pos = 139;  // Gripper starts open
+int gripper_pos = 41;  // Gripper starts open
 bool isCalibrationComplete = false; // Setup Calabration
 void setup(){ // all setup for milestone 1 
   // Set up line flollowing
@@ -79,6 +79,7 @@ void setup(){ // all setup for milestone 1
     setupUp_to_Mile_Stone_1();
     setup_Bump_Switches_and_lineFollowing();
     setup_transmit();
+    close();
 }
 void loop(){
     control();

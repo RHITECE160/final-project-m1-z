@@ -56,12 +56,12 @@ void left_turn() {
 }
 /* Opens the gripper */
 void open() {
-  for (int pos = gripper_pos; pos < 140; pos += 1)  // goes from 0 degrees to 180 degrees
+  for (int pos = gripper_pos; pos < 91; pos += 1)  // goes from 0 degrees to 180 degrees
   {                                                 // in steps of 1 degree
     myservo.write(pos);                             // tell servo to go to position in variable 'pos'
     delay(15);                                      // waits 15 ms for the servo to reach the position
   }
-  gripper_pos = 41;
+  gripper_pos = 90;
 }
 /* Closes the gripper */
 void close() {
@@ -69,7 +69,7 @@ void close() {
     myservo.write(pos);                               // tell servo to go to position in variable 'pos'
     delay(15);                                        // waits 15 ms for the servo to reach the position
   }
-  gripper_pos = 139;
+  gripper_pos = 41;
 }
 /* Stops robot forward: both motors disabled */
 void stop() {

@@ -39,7 +39,7 @@ const uint16_t lowSpeed = 15;
 const uint16_t fastSpeed = 30;
 
 Servo myservo;          // create servo object to control a servo
-int gripper_pos = 139;  // Gripper starts open
+int gripper_pos = 41;  // Gripper starts open
 
 void setup() {
   Serial.begin(57600);
@@ -92,6 +92,8 @@ void setup() {
       // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
     enableRXLEDFeedback(BLUE_LED);
     }
+  close();
+  
 }
 
 void loop() {
@@ -168,16 +170,16 @@ void left_turn() {
 }
 /* Opens the gripper */
 void open() {
-  for (int pos = gripper_pos; pos < 140; pos += 1)  // goes from 0 degrees to 180 degrees
+  for (int pos = gripper_pos; pos < 91; pos += 1)  
   {                                                 // in steps of 1 degree
     myservo.write(pos);                             // tell servo to go to position in variable 'pos'
     delay(15);                                      // waits 15 ms for the servo to reach the position
   }
-  gripper_pos = 139;
+  gripper_pos = 90;
 }
 /* Closes the gripper */
 void close() {
-  for (int pos = gripper_pos; pos >= 41; pos -= 1) {  // goes from 180 degrees to 0 degrees
+  for (int pos = gripper_pos; pos >= 41; pos -= 1) {  
     myservo.write(pos);                               // tell servo to go to position in variable 'pos'
     delay(15);                                        // waits 15 ms for the servo to reach the position
   }

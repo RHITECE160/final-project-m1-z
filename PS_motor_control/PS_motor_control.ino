@@ -4,10 +4,10 @@
 #include "PS2X_lib.h"
 
 // Define pin numbers for the button on the PlayStation controller
-#define PS2_DAT 33  //P1.7 <-> brown wire
-#define PS2_CMD 26  //P1.6 <-> orange wire
-#define PS2_SEL 5   //P2.3 <-> yellow wire (also called attention)
-#define PS2_CLK 2   //P6.7 <-> blue wire
+#define PS2_DAT 14  //P1.7 <-> brown wire
+#define PS2_CMD 15  //P1.6 <-> orange wire
+#define PS2_SEL 34   //P2.3 <-> yellow wire (also called attention)
+#define PS2_CLK 35   //P6.7 <-> blue wire
 
 // Create an instance of the playstation controller object
 PS2X ps2x;
@@ -26,7 +26,7 @@ const uint16_t lowSpeed = 15;
 const uint16_t fastSpeed = 30;
 
 Servo myservo;          // create servo object to control a servo
-int gripper_pos = 139;  // Gripper starts open
+int gripper_pos = 41;  // Gripper starts open
 
 void setup() {
   Serial.begin(57600);
@@ -61,7 +61,7 @@ void setup() {
         Serial.println("Controller refusing to enter Pressures mode, may not support it. ");
       delayMicroseconds(1000 * 1000);
     }
-
+  close();
   
 }
 

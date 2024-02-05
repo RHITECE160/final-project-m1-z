@@ -1,6 +1,7 @@
 // Jocelyn, Ian, Owen
-// 2/1/24
-//The program causes the robot to move baced on the ps and ir controlers & runs autonomus code to navigate the robot through the tunnel and drop off a block 
+// 2/5/24
+//The program causes the robot to move baced on the ps and ir controlers & runs autonomus code to navigate the robot to a 
+//maragold, through the tunnel and drop off a maragold, and light the candels  
 // The harware used was the PS and IR controlers and recivers and the robot & bump switches 
 // there are funtions for each of the movements and functions to relate butons to the movement funtions 
 // 
@@ -70,6 +71,7 @@ void setup(){ // all setup for milestone 1
   // Set up line flollowing
   // UART_SERIAL.begin(115200); // causes bugs 
 
+  // setup added since Milestone 1
     setupRSLK();
     /* Left button on Launchpad */
     setupWaitBtn(LP_LEFT_BTN);
@@ -79,8 +81,10 @@ void setup(){ // all setup for milestone 1
     setupUp_to_Mile_Stone_1();
     setup_Bump_Switches_and_lineFollowing();
     setup_transmit();
-    close();
+  // start the robot in the open position 
+    open();
 }
+// Start the robot in control mode 
 void loop(){
     control();
 }

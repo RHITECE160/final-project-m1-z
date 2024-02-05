@@ -1,3 +1,4 @@
+// all setup to Mile Stone 1
 void setupUp_to_Mile_Stone_1() {
   Serial.begin(57600);
   Serial.print("Starting up Robot code...... ");
@@ -51,6 +52,7 @@ void setupUp_to_Mile_Stone_1() {
     enableRXLEDFeedback(BLUE_LED);
   }
 }
+// chose controlers 
 void control() {
   // stop();
   Serial.print("Chosing Controler");
@@ -68,6 +70,7 @@ void control() {
     IRControler();
   }
 }
+// forward command 
 void forward() {
   disableMotor(BOTH_MOTORS);
   delay(50);
@@ -149,20 +152,24 @@ void stop() {
   Serial.println("Stop");
   disableMotor(BOTH_MOTORS);
 }
+// turn robot 90 to the right
 void turnNinetyRight() {
   right_spin();
   delay(turn_delay);
   stop();
 }
+// turn robot 90 to the left
 void turnNinetyLeft() {
   left_spin();
   delay(turn_delay);
   stop();
 }
+// turn robot to the left 180
 void turnOneEighty(){
   turnNinetyLeft();
   turnNinetyLeft();
 }
+// from the start of the tunnel drop off maragold
 void autonomous() {
   Serial.println("Running Autonomus Mode");
   forward_until_bump();
@@ -177,6 +184,7 @@ void autonomous() {
   open();
   control();
 }
+// from overal start point looking left pickup maragold and drop off 
 void autonomous2(){
   Serial.println("Running Autonomus Mode V2");
   for (int i = 0; i<2; i++){
@@ -210,6 +218,7 @@ void autonomous2(){
   open();
   control();
 }
+// pickup maragold 2 and drop off from overal start looking left
 void autonomous3() {
   Serial.println("Running Autonomus Mode V3");
   lineFollowing_timer();
@@ -239,6 +248,7 @@ void autonomous3() {
   open();
   control();
 }
+// recive commands form IR reciver
 void setupIRreciever(){
   Serial.println(F("START " __FILE__ " from " __DATE__));
     /*
@@ -255,6 +265,7 @@ void setupIRreciever(){
     // enable receive feedback and specify LED pin number (defaults to LED_BUILTIN)
     enableRXLEDFeedback(BLUE_LED);
 }
+// revive code from skull 
 void recieve(){
   if(irRX.decodeIR(&IRresults)){
     if(IRresults.address == 0xCE){
@@ -262,6 +273,7 @@ void recieve(){
     }
   }
 }
+// transmit IR signals to blocks 
 void transmit() {
   if(catrinaCode !=0) {
     IRmsg.address = 0xCE;
@@ -270,7 +282,7 @@ void transmit() {
   sendIR.write(&IRmsg);
   delay(1000);
 }
-
+// setup IR transmitor 
 void setup_transmit() {
     delay(500); // To be able to connect Serial monitor after reset or power up 
     Serial.println(F("START " __FILE__ " from " __DATE__));
@@ -295,21 +307,14 @@ void setup_transmit() {
     IRmsg.isRepeat = false;
      
 }
+// return IR code back to original 
 void setIRback(){
   IRmsg.address = 0xEE;
   IRmsg.command = 0xA0;
 }
 
-/* RemoteControlPlaystation() function
-  This function uses a playstation controller and the PLSK libraray with
-  an RLSK robot using to implement remote controller. 
-  
-  A few actions are programed for an example. 
 
-  Button control map:
-  PAD UP button moves both motors forward
-  CROSS button stops motors
-  */
+// recives commands from playstation controler 
 void RemoteControlPlaystation() {
   // put your code here to run in remote control mode
 
@@ -357,6 +362,7 @@ void RemoteControlPlaystation() {
     autonomous3();
   }
 }
+// recive commands form IR controler 
 void IRControler() {
   if (irRX.decodeIR(&IRresults)) {
     switch (IRresults.command) {
@@ -415,6 +421,7 @@ void IRControler() {
     }
   }
 }
+// calabrate line following to the floor color
 void floorCalibration() {
   /* Place Robot On Floor (no line) */
   delay(2000);
@@ -449,6 +456,7 @@ void floorCalibration() {
 
   enableMotor(BOTH_MOTORS);
 }
+// follow the line
 void lineFollowing() {
 
   Serial.println("Running Line Following");
@@ -478,6 +486,7 @@ void lineFollowing() {
   disableMotor(BOTH_MOTORS);
   delay(100);
 }
+// run line following untill the bump switches are pressed 
 void setup_Bump_Switches_and_lineFollowing() {
   Serial.println("setup bump");
   setupRSLK();
@@ -486,6 +495,7 @@ void setup_Bump_Switches_and_lineFollowing() {
     isCalibrationComplete = true;
   }
 }
+// forward untill the bump switches are pressed
 void forward_until_bump() {
   bool hitObstacle = false;
 

@@ -132,12 +132,12 @@ void left_turn() {
 /* Opens the gripper */
 void close() {
   Serial.println("Open");
-  for (int pos = gripper_pos; pos < 91; pos += 1)  
+  for (int pos = gripper_pos; pos < 92; pos += 1)  
   {                                                 // in steps of 1 degree
     myservo.write(pos);                             // tell servo to go to position in variable 'pos'
     delay(15);                                      // waits 15 ms for the servo to reach the position
   }
-  gripper_pos = 90;
+  gripper_pos = 91;
 }
 /* Closes the gripper */
 void open() {
